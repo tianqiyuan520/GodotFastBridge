@@ -5,8 +5,9 @@ import sys
 from methods import print_error
 
 
-libname = "EXTENSION-NAME"
+libname = "GodotFastBridge"
 projectdir = "project"
+addondir = "project/addons/GodotFastBridge"
 
 localEnv = Environment(tools=["default"], PLATFORM="")
 
@@ -38,6 +39,8 @@ Run the following command to download godot-cpp:
 env = SConscript("godot-cpp/SConstruct", {"env": env, "customs": customs})
 
 env.Append(CPPPATH=["src/"])
+# C ABI 导出宏：同一份 gfb_abi.h 在 DLL 内为 dllexport、在其它翻译单元为 dllimport。
+env.Append(CPPDEFINES=["GFB_EXPORTS"])
 sources = Glob("src/*.cpp")
 
 if env["target"] in ["editor", "template_debug"]:
@@ -58,7 +61,7 @@ library = env.SharedLibrary(
     source=sources,
 )
 
-copy = env.Install("{}/bin/{}/".format(projectdir, env["platform"]), library)
+copy = env.Install("{}/bin/{}/".format(addondir, env["platform"]), library)
 
 default_args = [library, copy]
 Default(*default_args)

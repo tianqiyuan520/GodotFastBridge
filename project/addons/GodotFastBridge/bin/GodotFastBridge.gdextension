@@ -1,0 +1,17 @@
+[configuration]
+
+entry_symbol = "godot_fast_bridge_library_init"
+compatibility_minimum = "4.4"
+reloadable = false
+
+[libraries]
+; 相对路径：整个 addon 目录可整体挪动。
+
+windows.x86_64.debug = "./windows/GodotFastBridge.windows.template_debug.x86_64.dll"
+windows.x86_64.release = "./windows/GodotFastBridge.windows.template_release.x86_64.dll"
+
+linux.x86_64.debug = "./linux/libGodotFastBridge.linux.template_debug.x86_64.so"
+linux.x86_64.release = "./linux/libGodotFastBridge.linux.template_release.x86_64.so"
+
+macos.debug = "./macos/libGodotFastBridge.macos.template_debug.dylib"
+macos.release = "./macos/libGodotFastBridge.macos.template_release.dylib"

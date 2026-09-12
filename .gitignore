@@ -6,6 +6,14 @@
 /bin/**
 !project/bin/*.gdextension
 
+# GFB addon 二进制（只提交 .gdextension 描述符，与 GDJobSystem 的分发约定一致）
+project/addons/GodotFastBridge/bin/**
+!project/addons/GodotFastBridge/bin/*.gdextension
+!project/addons/GodotFastBridge/bin/*.gdextension.uid
+
+# 导出产物
+project/build/
+
 # Ignore scons database
 .sconsign*.dblite
 

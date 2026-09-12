@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="FastBridge" inherits="Node" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../class.xsd">
+	<brief_description>
+		大数据提交桥：配置槽位并把 C# 侧连续内存直接提交给引擎，复用原生缓冲。
+	</brief_description>
+	<description>
+		配置面（本类的方法，低频）负责把 RID 与容量登记到槽位；热路径在 C ABI 上（[code]gfb_submit[/code] / [code]gfb_submit_strided[/code] / [code]gfb_read_into[/code]），
+		C# 侧通过 [code]get_submit_address()[/code] / [code]get_context_address()[/code] 取得函数指针后直接调用。
+
+		契约：
+		- TEXTURE / MULTIMESH 槽每次提交的字节数必须等于配置容量（引擎侧 API 上传整个容器）；
+		- STORAGE_BUFFER 槽为 grow-only，提交字节数可小于等于容量；
+		- 传入的原生指针仅在调用期内有效，桥不保留。
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="configure_texture">
+			<return type="void" />
+			<param index="0" name="slot" type="int" />
+			<param index="1" name="texture" type="RID" />
+			<param index="2" name="byte_capacity" type="int" />
+			<description>
+				把槽位配置为 RenderingDevice 纹理提交槽，容量必须等于纹理字节数。
+			</description>
+		</method>
+		<method name="configure_storage_buffer">
+			<return type="void" />
+			<param index="0" name="slot" type="int" />
+			<param index="1" name="buffer" type="RID" />
+			<param index="2" name="byte_capacity" type="int" />
+			<description>
+				把槽位配置为 RenderingDevice 存储缓冲提交槽（grow-only 缓冲）。
+			</description>
+		</method>
+		<method name="configure_multimesh">
+			<return type="void" />
+			<param index="0" name="slot" type="int" />
+			<param index="1" name="multimesh" type="RID" />
+			<param index="2" name="instance_count" type="int" />
+			<param index="3" name="floats_per_instance" type="int" />
+			<description>
+				把槽位配置为 MultiMesh 缓冲提交槽（2D 为 8 floats/实例，3D 为 12）。
+			</description>
+		</method>
+		<method name="clear_slot">
+			<return type="void" />
+			<param index="0" name="slot" type="int" />
+			<description>清空槽位（释放其缓冲并解除 RID 绑定）。</description>
+		</method>
+		<method name="set_slot_enabled">
+			<return type="void" />
+			<param index="0" name="slot" type="int" />
+			<param index="1" name="enabled" type="bool" />
+			<description>开关槽位（false 时提交直接报错返回，用于 A/B 对照）。</description>
+		</method>
+		<method name="get_submit_address">
+			<return type="int" />
+			<description>返回 [code]gfb_submit[/code] 的地址（C# 侧构造函数指针用，只取一次）。</description>
+		</method>
+		<method name="get_submit_strided_address">
+			<return type="int" />
+			<description>返回 [code]gfb_submit_strided[/code] 的地址。</description>
+		</method>
+		<method name="get_read_address">
+			<return type="int" />
+			<description>返回 [code]gfb_read_into[/code] 的地址。</description>
+		</method>
+		<method name="get_context_address">
+			<return type="int" />
+			<description>返回本实例指针（作为 C ABI 的 ctx）。</description>
+		</method>
+		<method name="get_abi_version">
+			<return type="int" />
+			<description>返回 C ABI 版本，C# 侧启动时必须校验。</description>
+		</method>
+		<method name="get_stats">
+			<return type="Dictionary" />
+			<description>返回各槽位调用次数、累计 fill/submit 微秒与缓冲峰值。</description>
+		</method>
+	</methods>
+</class>
